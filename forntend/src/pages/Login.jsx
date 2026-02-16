@@ -8,7 +8,7 @@ export default function Login() {
   const [form, setForm] = useState({
     email: "",
     password: "",
-    role: "student", // default
+    role: "student",
   });
 
   const [error, setError] = useState("");
@@ -24,10 +24,19 @@ export default function Login() {
     setLoading(true);
 
     try {
+      /* ⭐ HARDCODED ADMIN LOGIN */
+      if (
+        form.role === "admin" &&
+        form.email === "admin@gmail.com" &&
+        form.password === "admin"
+      ) {
+        navigate("/admin");
+        return;
+      }
+
       const res = await loginUser(form);
 
       if (res.success) {
-        // ✅ Navigate based on role
         if (form.role === "admin") {
           navigate("/admin");
         } else {
@@ -36,6 +45,7 @@ export default function Login() {
       } else {
         setError("Invalid email or password");
       }
+
     } catch (err) {
       setError(err.message);
     } finally {
@@ -112,7 +122,6 @@ export default function Login() {
         <div className="form-container">
           <div className="header">User Login</div>
 
-          {/* ✅ Role Selection */}
           <select value={form.role} onChange={handleChange("role")}>
             <option value="student">Student Login</option>
             <option value="admin">Admin Login</option>

@@ -25,7 +25,8 @@ export default function Register() {
     password: "",
     confirmPassword: "",
     qualifications: [],
-    declaration: false
+    declaration: false,
+    role: "student" 
   });
 
   const [errors, setErrors] = useState({});

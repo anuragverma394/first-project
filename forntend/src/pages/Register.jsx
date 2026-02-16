@@ -65,7 +65,7 @@ export default function Register() {
 
   const validateYear = (year) => {
     const y = Number(year);
-    return y >= 1960 && y <= currentYear;
+    return y >= 1750 && y <= currentYear;
   };
 
   const addQualification = () => {
@@ -77,7 +77,7 @@ export default function Register() {
     }
 
     if (!validateYear(year)) {
-      alert(`Year must be between 1960 and ${currentYear}`);
+      alert(`Year must be between 1750 and ${currentYear}`);
       return;
     }
 
@@ -92,7 +92,7 @@ export default function Register() {
     };
 
     setForm(updatedForm);
-    setErrors(validateRegister(updatedForm)); // ✅ Revalidate
+    setErrors(validateRegister(updatedForm)); 
 
     setQualificationInput({
       collegeName: "",
@@ -121,7 +121,7 @@ export default function Register() {
       if (editIndex === null) return;
 
     if (!validateYear(qualificationInput.year)) {
-      alert(`Year must be between 1960 and ${currentYear}`);
+      alert(`Year must be between 1750 and ${currentYear}`);
       return;
     }
 

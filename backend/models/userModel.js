@@ -30,7 +30,7 @@ exports.createUser = async (
       state,
       pincode,
       JSON.stringify(qualifications || []) ,
-      role || "student" // ✅ SAFE DEFAULT
+      role || "student" 
     ]
   );
 };

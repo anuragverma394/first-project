@@ -15,6 +15,7 @@ const request = async (endpoint, method = "GET", body = null) => {
   return data;
 };
 
+
 export const loginUser = (payload) =>
   request("/login", "POST", payload);
 

@@ -13,6 +13,8 @@ export default function Admin() {
   }, []);
 
   const loadUsers = async () => {
+
+    
     try {
       const data = await getAllUsers();
       setUsers(data.users || []);
@@ -20,6 +22,7 @@ export default function Admin() {
       alert(err.message);
     }
   };
+  
 
   const handleLogout = () => {
     localStorage.clear();

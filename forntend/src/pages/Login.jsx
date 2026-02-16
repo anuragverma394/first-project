@@ -24,12 +24,8 @@ export default function Login() {
     setLoading(true);
 
     try {
-      /* ⭐ HARDCODED ADMIN LOGIN */
-      if (
-        form.role === "admin" &&
-        form.email === "admin@gmail.com" &&
-        form.password === "admin"
-      ) {
+     
+      if (form.role === "admin" &&form.email === "admin@gmail.com" &&form.password === "admin") {
         navigate("/admin");
         return;
       }

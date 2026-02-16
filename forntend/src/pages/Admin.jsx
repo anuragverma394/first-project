@@ -199,9 +199,7 @@ export default function Admin() {
           <div className="navbar">
             <strong>Admin Dashboard</strong>
 
-            {/* <button className="logout-btn" onClick={handleLogout}>
-              Logout
-            </button> */}
+          
               <button
             type="button"
             className="logout-btn"

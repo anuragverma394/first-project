@@ -186,8 +186,8 @@ export default function Register() {
     let y = 140;
 
     form.qualifications.forEach((q, i) => {
-      if (y > 280) {     // ✅ ADDED
-    doc.addPage();    // ✅ ADDED
+      if (y > 280) {     
+    doc.addPage();    
     y = 20;           
   }
       doc.text(

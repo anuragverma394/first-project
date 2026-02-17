@@ -21,8 +21,17 @@ exports.register = async (req, res) => {
   } = req.body;
 
   try {
-    if (!password) {
-      return res.status(400).json({ message: "Password required ❌" });
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email & Password required ❌" });
+    }
+
+    const existingUser = await pool.query(
+      `SELECT id FROM "user".users WHERE email = $1`,
+      [email]
+    );
+
+    if (existingUser.rows.length > 0) {
+      return res.status(400).json({ message: "Email already exists ❌" });
     }
 
     const salt = await bcrypt.genSalt(10);
@@ -33,30 +42,25 @@ exports.register = async (req, res) => {
       (name, email, password, phone, dob, gender, address, city, state, pincode, qualifications, role)
       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
       [
-        name,
+        name || null,
         email,
         hashedPassword,
-        phone,
-        dob,
-        gender,
-        address,
-        city,
-        state,
-        pincode,
+        phone || null,
+        dob || null,
+        gender || null,
+        address || null,
+        city || null,
+        state || null,
+        pincode || null,
         JSON.stringify(qualifications || []),
         role,
       ]
     );
 
-    res.json({ message: "User Registered Successfully ✅" });
+    res.json({ success: true, message: "User Registered Successfully ✅" });
 
   } catch (err) {
-    console.error("REGISTER ERROR ❌", err);
-
-    if (err.code === "23505") {
-      return res.status(400).json({ message: "Email already exists ❌" });
-    }
-
+    console.error(err);
     res.status(500).json({ message: "Database Error ❌" });
   }
 };
@@ -67,8 +71,14 @@ exports.login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email & Password required ❌" });
+    }
+
     const result = await pool.query(
-      `SELECT * FROM "user".users WHERE email = $1`,
+      `SELECT id, name, email, password, role
+       FROM "user".users
+       WHERE email = $1`,
       [email]
     );
 
@@ -93,30 +103,34 @@ exports.login = async (req, res) => {
     res.json({
       success: true,
       token,
-      user,
-      role: user.role,
+      user: {
+        id: user.id,
+        name: user.name,
+        email: user.email,
+        role: user.role,
+      },
     });
 
   } catch (err) {
-    console.error("LOGIN ERROR ❌", err);
+    console.error(err);
     res.status(500).json({ message: "Server Error ❌" });
   }
 };
 
-/* ================= GET USERS (ADMIN) ================= */
+/* ================= GET USERS ================= */
 
 exports.getAllUsers = async (req, res) => {
   try {
     const result = await pool.query(
-      `SELECT id, name, email, phone, role 
-       FROM "user".users 
+      `SELECT id, name, email, phone, role
+       FROM "user".users
        ORDER BY id DESC`
     );
 
-    res.json({ users: result.rows });
+    res.json({ success: true, users: result.rows });
 
   } catch (err) {
-    console.error("FETCH USERS ERROR ❌", err);
+    console.error(err);
     res.status(500).json({ message: "Failed to fetch users ❌" });
   }
 };
@@ -124,18 +138,83 @@ exports.getAllUsers = async (req, res) => {
 /* ================= DELETE USER ================= */
 
 exports.deleteUser = async (req, res) => {
-  const { id } = req.params;
-
   try {
     await pool.query(
       `DELETE FROM "user".users WHERE id = $1`,
-      [id]
+      [req.params.id]
     );
 
-    res.json({ message: "User Deleted ✅" });
+    res.json({ success: true, message: "User Deleted ✅" });
 
   } catch (err) {
-    console.error("DELETE ERROR ❌", err);
+    console.error(err);
     res.status(500).json({ message: "Delete failed ❌" });
+  }
+};
+
+/* ================= CREATE TASK ================= */
+
+exports.createTask = async (req, res) => {
+  const { email, title, due_date } = req.body;
+
+  try {
+    const userResult = await pool.query(
+      `SELECT id FROM "user".users WHERE email = $1`,
+      [email]
+    );
+
+    if (userResult.rows.length === 0) {
+      return res.status(400).json({ message: "Student not found ❌" });
+    }
+
+    const studentId = userResult.rows[0].id;
+
+    await pool.query(
+      `INSERT INTO "user".tasks (student_id, title, due_date, status, progress, review_status)
+       VALUES ($1, $2, $3, 'pending', 0, 'pending')`,
+      [studentId, title, due_date || null]
+    );
+
+    res.json({ success: true, message: "Task Assigned ✅" });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to assign task ❌" });
+  }
+};
+
+/* ================= GET STUDENT TASKS ================= */
+
+exports.getStudentTasks = async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT * FROM "user".tasks
+       WHERE student_id = $1
+       ORDER BY id DESC`,
+      [req.user.id]
+    );
+
+    res.json(result.rows);
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Failed to load tasks ❌" });
+  }
+};
+
+/* ================= UPDATE PROGRESS ================= */
+
+exports.updateProgress = async (req, res) => {
+  try {
+    await pool.query(
+      `UPDATE "user".tasks SET progress = $1 WHERE id = $2`,
+      [req.body.progress, req.params.id]
+    );
+
+    res.json({ success: true });
+
+  } catch (err) {
+    console.error(err);
+    res.status(500).json({ message: "Progress update failed ❌" });
   }
 };

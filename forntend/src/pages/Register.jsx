@@ -186,9 +186,9 @@ export default function Register() {
     let y = 140;
 
     form.qualifications.forEach((q, i) => {
-      if (y > 280) {     
-    doc.addPage();    
-    y = 20;           
+      if (y > 280) {
+    doc.addPage();
+    y = 20;
   }
       doc.text(
         `[${i + 1}] ${q.collegeName} - ${q.course} - ${q.year} - ${q.percentage}%`,

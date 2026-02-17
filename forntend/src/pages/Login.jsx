@@ -15,8 +15,7 @@ export default function Login() {
   const [loading, setLoading] = useState(false);
 
   const handleChange = (field) => (e) => {
-    const updated = { ...form, [field]: e.target.value };
-    setForm(updated);
+    setForm({ ...form, [field]: e.target.value });
   };
 
   const handleLogin = async () => {
@@ -24,8 +23,12 @@ export default function Login() {
     setLoading(true);
 
     try {
-     
-      if (form.role === "admin" &&form.email === "admin@gmail.com" &&form.password === "admin") {
+      /* ✅ Static admin shortcut */
+      if (
+        form.role === "admin" &&
+        form.email === "admin@gmail.com" &&
+        form.password === "admin"
+      ) {
         navigate("/admin");
         return;
       }
@@ -33,13 +36,16 @@ export default function Login() {
       const res = await loginUser(form);
 
       if (res.success) {
-        if (form.role === "admin") {
+        localStorage.setItem("token", res.token);
+        localStorage.setItem("user", JSON.stringify(res.user));
+
+        if (res.user.role === "admin") {
           navigate("/admin");
         } else {
           navigate("/student");
         }
       } else {
-        setError("Invalid email or password");
+        setError("Invalid credentials");
       }
 
     } catch (err) {

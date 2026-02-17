@@ -27,3 +27,5 @@ export const getAllUsers = () =>
 
 export const deleteUser = (id) =>
   request(`/users/${id}`, "DELETE");
+export const updateUser = (id, payload) =>
+  request(`/users/${id}`, "PUT", payload);

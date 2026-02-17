@@ -36,6 +36,11 @@ export const validateRegister = ({
   if (!dob) {
     errors.dob = "Date of Birth is required";
   }
+    // }else if(!/^\d{2}-\d{2}-\d{4}$/.test(dob)) {
+  //   errors.dob = "Date of Birth must be in DD-MM-YY format";
+  // }else if (new Date(dob) > new Date()) {
+  //   errors.dob = "Date of Birth cannot be in the future";
+  // }
 
   if (!gender) {
     errors.gender = "Please select gender";
@@ -74,8 +79,7 @@ export const validateRegister = ({
     errors.confirmPassword = "Passwords do not match";
   }
 
-  /* ✅ CRITICAL SAFE CHECK */
- /* ✅ QUALIFICATION VALIDATION */
+
 
 if (!Array.isArray(qualifications) || qualifications.length === 0) {
   errors.qualifications = "Add at least one qualification";

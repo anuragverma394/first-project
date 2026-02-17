@@ -1,20 +1,18 @@
-    const express = require("express");
-    const cors = require("cors");
+const express = require("express");
+const cors = require("cors");
 
-    const userRoutes = require("./routes/userRoutes");
+const userRoutes = require("./routes/userRoutes");
+const studentRoutes = require("./routes/studentRoutes");
+const adminRoutes = require("./routes/adminRoutes");
 
-    const app = express();
+const app = express();
 
-    app.use(cors());
-    app.use(express.json());
+app.use(cors());
+app.use(express.json());
 
-    app.use("/api", userRoutes); // ✅ BEST PRACTICE
+// ✅ All routes clearly prefixed
+app.use("/api", userRoutes);
+app.use("/api/student", studentRoutes);
+app.use("/api/admin", adminRoutes);
 
-    module.exports = app;
-
-    const studentRoutes = require("./routes/studentRoutes");
-
-    app.use(studentRoutes);
-
-    const adminRoutes = require("./routes/adminRoutes");
-    app.use("/admin", adminRoutes);
+module.exports = app;

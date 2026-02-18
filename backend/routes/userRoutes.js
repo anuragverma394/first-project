@@ -1,18 +1,21 @@
-const express = require("express");
+
+const express    = require("express");
+const router     = express.Router();
 const controller = require("../controllers/userController");
-const { verifyToken } = require("../middleware/auth");
+const { verifyToken, verifyAdmin } = require("../middleware/auth");
 
-const router = express.Router();
-
+/* ── AUTH (public) ── */
 router.post("/register", controller.register);
-router.post("/login", controller.login);
+router.post("/login",    controller.login);
 
-router.get("/users", controller.getAllUsers);
-router.delete("/users/:id", controller.deleteUser);
+/* ── USER MANAGEMENT (admin only) ── */
+router.get(   "/users",     verifyToken, verifyAdmin, controller.getAllUsers);
+router.delete("/users/:id", verifyToken, verifyAdmin, controller.deleteUser);
 
-router.post("/admin/task", controller.createTask);
+/* ── FULL STUDENT DETAILS with all DB columns (admin only) ── */
+router.get("/students", verifyToken, verifyAdmin, controller.getStudentDetails);
 
-router.get("/student/tasks", verifyToken, controller.getStudentTasks);
-router.put("/student/progress/:id", verifyToken, controller.updateProgress);
+/* ── TASK CREATION via userController (admin only) ── */
+router.post("/admin/task", verifyToken, verifyAdmin, controller.createTask);
 
 module.exports = router;

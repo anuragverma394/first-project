@@ -1,28 +1,23 @@
-// const express = require("express");
-// const router = express.Router();
-// const controller = require("../controllers/adminController");
-// const { verifyToken, verifyAdmin } = require("../middleware/auth");
 
-// /* TASK MANAGEMENT */
-// // router.post("/admin/task", verifyToken, verifyAdmin, controller.assignTask);
-// // router.get("/admin/tasks", verifyToken, verifyAdmin, controller.getTasks);
-// // router.delete("/admin/task/:id", verifyToken, verifyAdmin, controller.deleteTask);
-// // router.put("/admin/review/:id", verifyToken, verifyAdmin, controller.reviewSubmission);
-// // console.log("ADMIN ROUTES LOADED ✅");
+const express    = require("express");
+const router     = express.Router();
+const controller = require("../controllers/adminController");
+const { verifyToken, verifyAdmin } = require("../middleware/auth");
 
-// module.exports = router;
+/*
+  Server mounts this at /api/admin
+  So routes here are relative — do NOT repeat /admin prefix
+  ✅  POST   /api/admin/task          → assignTask
+  ✅  GET    /api/admin/tasks         → getTasks
+  ✅  DELETE /api/admin/task/:id      → deleteTask
+  ✅  PUT    /api/admin/review/:id    → reviewSubmission
+  ✅  GET    /api/admin/submissions   → getSubmissions
+*/
 
-const express = require("express");
-const router = express.Router();
-
-const controller = require("../controllers/userController");
-const { verifyToken } = require("../middleware/auth");
-
-/* ADMIN ROUTES */
-
-router.post("/task", verifyToken, controller.createTask);
-router.get("/tasks", verifyToken, controller.getAllTasks);
-router.delete("/task/:id", verifyToken, controller.deleteTask);
-router.put("/review/:id", verifyToken, controller.reviewSubmission);
+router.post(  "/task",           verifyToken, verifyAdmin, controller.assignTask);
+router.get(   "/tasks",          verifyToken, verifyAdmin, controller.getTasks);
+router.delete("/task/:id",       verifyToken, verifyAdmin, controller.deleteTask);
+router.put(   "/review/:id",     verifyToken, verifyAdmin, controller.reviewSubmission);
+router.get(   "/submissions",    verifyToken, verifyAdmin, controller.getSubmissions);
 
 module.exports = router;

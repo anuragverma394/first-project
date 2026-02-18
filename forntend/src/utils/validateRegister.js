@@ -1,3 +1,4 @@
+
 export const validateRegister = ({
   name,
   email,
@@ -10,9 +11,9 @@ export const validateRegister = ({
   pincode,
   password,
   confirmPassword,
-  qualifications
+  qualifications,
+  role = "student",
 }) => {
-
   const errors = {};
 
   if (!name) {
@@ -36,11 +37,6 @@ export const validateRegister = ({
   if (!dob) {
     errors.dob = "Date of Birth is required";
   }
-    // }else if(!/^\d{2}-\d{2}-\d{4}$/.test(dob)) {
-  //   errors.dob = "Date of Birth must be in DD-MM-YY format";
-  // }else if (new Date(dob) > new Date()) {
-  //   errors.dob = "Date of Birth cannot be in the future";
-  // }
 
   if (!gender) {
     errors.gender = "Please select gender";
@@ -79,32 +75,19 @@ export const validateRegister = ({
     errors.confirmPassword = "Passwords do not match";
   }
 
-
-
-if (!Array.isArray(qualifications) || qualifications.length === 0) {
-  errors.qualifications = "Add at least one qualification";
-} else {
-  qualifications.forEach((q, index) => {
-
-    if (!q.collegeName) {
-      errors.qualifications = `Qualification ${index + 1}: College Name required`;
+  // ✅ Only require qualifications for students, not admins
+  if (role !== "admin") {
+    if (!Array.isArray(qualifications) || qualifications.length === 0) {
+      errors.qualifications = "Add at least one qualification";
+    } else {
+      qualifications.forEach((q, index) => {
+        if (!q.collegeName) errors.qualifications = `Qualification ${index + 1}: College Name required`;
+        if (!q.course)      errors.qualifications = `Qualification ${index + 1}: Course required`;
+        if (!q.year)        errors.qualifications = `Qualification ${index + 1}: Year required`;
+        if (!q.percentage)  errors.qualifications = `Qualification ${index + 1}: Percentage required`;
+      });
     }
-
-    if (!q.course) {
-      errors.qualifications = `Qualification ${index + 1}: Course required`;
-    }
-
-    if (!q.year) {
-      errors.qualifications = `Qualification ${index + 1}: Year required`;
-    }
-
-    if (!q.percentage) {
-      errors.qualifications = `Qualification ${index + 1}: Percentage required`;
-    }
-
-  });
-}
-
+  }
 
   return errors;
 };

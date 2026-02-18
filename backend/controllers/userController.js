@@ -1,9 +1,10 @@
 const bcrypt = require("bcryptjs");
-const jwt = require("jsonwebtoken");
-const pool = require("../config/db");
+const jwt    = require("jsonwebtoken");
+const pool   = require("../config/db");
 
-/* ================= REGISTER ================= */
-
+/* ════════════════════════════════════════
+   REGISTER
+   ════════════════════════════════════════ */
 exports.register = async (req, res) => {
   const {
     name,
@@ -21,58 +22,92 @@ exports.register = async (req, res) => {
   } = req.body;
 
   try {
+    console.log("FULL BODY:", req.body);
+
+    /* ✅ Basic validation */
     if (!email || !password) {
-      return res.status(400).json({ message: "Email & Password required ❌" });
+      return res.status(400).json({
+        message: "Email & Password required ❌",
+      });
     }
 
-    const existingUser = await pool.query(
+    /* ✅ Check existing user */
+    const existing = await pool.query(
       `SELECT id FROM "user".users WHERE email = $1`,
       [email]
     );
 
-    if (existingUser.rows.length > 0) {
-      return res.status(400).json({ message: "Email already exists ❌" });
+    if (existing.rows.length > 0) {
+      return res.status(400).json({
+        message: "Email already registered ❌",
+      });
     }
 
-    const salt = await bcrypt.genSalt(10);
-    const hashedPassword = await bcrypt.hash(password, salt);
+    /* ✅ Hash password */
+    const hashedPassword = await bcrypt.hash(password, 10);
+
+    /* ✅ SAFE DATE HANDLING */
+    const safeDob =
+      dob && typeof dob === "string" && dob.trim() !== "" ? dob : null;
+
+    /* ✅ SAFE JSONB HANDLING */
+    const safeQualifications = Array.isArray(qualifications)
+      ? qualifications
+      : [];
+
+    console.log(
+      "QUALIFICATIONS TO DB:",
+      JSON.stringify(safeQualifications, null, 2)
+    );
 
     await pool.query(
       `INSERT INTO "user".users
-      (name, email, password, phone, dob, gender, address, city, state, pincode, qualifications, role)
-      VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
+       (name, email, password, phone, dob, gender, address, city, state, pincode, qualifications, role)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12)`,
       [
-        name || null,
-        email,
+        name?.trim() || null,
+        email.trim(),
         hashedPassword,
-        phone || null,
-        dob || null,
-        gender || null,
-        address || null,
-        city || null,
-        state || null,
-        pincode || null,
-        JSON.stringify(qualifications || []),
+        phone?.trim() || null,
+        safeDob,
+        gender?.trim() || null,
+        address?.trim() || null,
+        city?.trim() || null,
+        state?.trim() || null,
+        pincode?.trim() || null,
+
+        /* ✅ JSONB SAFE */
+        JSON.stringify(safeQualifications),
+
         role,
       ]
     );
 
-    res.json({ success: true, message: "User Registered Successfully ✅" });
+    res.json({
+      success: true,
+      message: "Registered successfully ✅",
+    });
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Database Error ❌" });
+    console.error("REGISTER ERROR ❌", err.message);
+
+    res.status(500).json({
+      message: err.message, // shows real DB error
+    });
   }
 };
 
-/* ================= LOGIN ================= */
-
+/* ════════════════════════════════════════
+   LOGIN
+   ════════════════════════════════════════ */
 exports.login = async (req, res) => {
   const { email, password } = req.body;
 
   try {
     if (!email || !password) {
-      return res.status(400).json({ message: "Email & Password required ❌" });
+      return res.status(400).json({
+        message: "Email & Password required ❌",
+      });
     }
 
     const result = await pool.query(
@@ -83,19 +118,24 @@ exports.login = async (req, res) => {
     );
 
     if (result.rows.length === 0) {
-      return res.status(400).json({ message: "User not found ❌" });
+      return res.status(400).json({
+        message: "User not found ❌",
+      });
     }
 
     const user = result.rows[0];
 
-    const isMatch = await bcrypt.compare(password, user.password);
+    const match = await bcrypt.compare(password, user.password);
 
-    if (!isMatch) {
-      return res.status(400).json({ message: "Wrong password ❌" });
+    if (!match) {
+      return res.status(400).json({
+        message: "Wrong password ❌",
+      });
     }
 
     const token = jwt.sign(
-      { id: user.id, role: user.role },
+      { id: user.id,
+       role: user.role },
       process.env.JWT_SECRET,
       { expiresIn: "1d" }
     );
@@ -112,13 +152,17 @@ exports.login = async (req, res) => {
     });
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server Error ❌" });
+    console.error("LOGIN ERROR ❌", err.message);
+
+    res.status(500).json({
+      message: "Server error ❌",
+    });
   }
 };
 
-/* ================= GET USERS ================= */
-
+/* ════════════════════════════════════════
+   GET ALL USERS
+   ════════════════════════════════════════ */
 exports.getAllUsers = async (req, res) => {
   try {
     const result = await pool.query(
@@ -127,94 +171,121 @@ exports.getAllUsers = async (req, res) => {
        ORDER BY id DESC`
     );
 
-    res.json({ success: true, users: result.rows });
+    res.json({
+      success: true,
+      users: result.rows,
+    });
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Failed to fetch users ❌" });
+    console.error("GET USERS ERROR ❌", err.message);
+
+    res.status(500).json({
+      message: "Failed to fetch users ❌",
+    });
   }
 };
 
-/* ================= DELETE USER ================= */
+/* ════════════════════════════════════════
+   GET STUDENT DETAILS
+   ════════════════════════════════════════ */
+exports.getStudentDetails = async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT id, name, email, phone, dob, gender,
+              address, city, state, pincode,
+              qualifications, role
+       FROM "user".users
+       WHERE LOWER(role) = 'student'
+       ORDER BY id DESC`
+    );
 
+    res.json({
+      success: true,
+      students: result.rows,
+    });
+
+  } catch (err) {
+    console.error("GET STUDENT DETAILS ERROR ❌", err.message);
+
+    res.status(500).json({
+      message: "Failed to fetch student details ❌",
+    });
+  }
+};
+
+/* ════════════════════════════════════════
+   DELETE USER
+   ════════════════════════════════════════ */
 exports.deleteUser = async (req, res) => {
   try {
-    await pool.query(
-      `DELETE FROM "user".users WHERE id = $1`,
+    const result = await pool.query(
+      `DELETE FROM "user".users
+       WHERE id = $1
+       RETURNING id`,
       [req.params.id]
     );
 
-    res.json({ success: true, message: "User Deleted ✅" });
+    if (result.rows.length === 0) {
+      return res.status(404).json({
+        message: "User not found ❌",
+      });
+    }
+
+    res.json({
+      success: true,
+      message: "User deleted ✅",
+    });
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Delete failed ❌" });
+    console.error("DELETE USER ERROR ❌", err.message);
+
+    res.status(500).json({
+      message: "Delete failed ❌",
+    });
   }
 };
 
-/* ================= CREATE TASK ================= */
-
+/* ════════════════════════════════════════
+   CREATE TASK
+   ════════════════════════════════════════ */
 exports.createTask = async (req, res) => {
   const { email, title, due_date } = req.body;
 
   try {
-    const userResult = await pool.query(
+    if (!email || !title) {
+      return res.status(400).json({
+        message: "Email and title required ❌",
+      });
+    }
+
+    const student = await pool.query(
       `SELECT id FROM "user".users WHERE email = $1`,
       [email]
     );
 
-    if (userResult.rows.length === 0) {
-      return res.status(400).json({ message: "Student not found ❌" });
+    if (student.rows.length === 0) {
+      return res.status(404).json({
+        message: "Student not found ❌",
+      });
     }
 
-    const studentId = userResult.rows[0].id;
-
     await pool.query(
-      `INSERT INTO "user".tasks (student_id, title, due_date, status, progress, review_status)
+      `INSERT INTO "user".tasks
+       (student_id, title, due_date, status, progress, review_status)
        VALUES ($1, $2, $3, 'pending', 0, 'pending')`,
-      [studentId, title, due_date || null]
+      [student.rows[0].id, title, due_date || null]
     );
 
-    res.json({ success: true, message: "Task Assigned ✅" });
+    res.json({
+      success: true,
+      message: "Task assigned ✅",
+    });
 
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Failed to assign task ❌" });
-  }
-};
+    console.error("CREATE TASK ERROR ❌", err.message);
 
-/* ================= GET STUDENT TASKS ================= */
-
-exports.getStudentTasks = async (req, res) => {
-  try {
-    const result = await pool.query(
-      `SELECT * FROM "user".tasks
-       WHERE student_id = $1
-       ORDER BY id DESC`,
-      [req.user.id]
-    );
-
-    res.json(result.rows);
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Failed to load tasks ❌" });
-  }
-};
-
-/* ================= UPDATE PROGRESS ================= */
-
-exports.updateProgress = async (req, res) => {
-  try {
-    await pool.query(
-      `UPDATE "user".tasks SET progress = $1 WHERE id = $2`,
-      [req.body.progress, req.params.id]
-    );
-
-    res.json({ success: true });
-
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Progress update failed ❌" });
+    res.status(500).json({
+      message: "Failed to assign task ❌",
+    });
   }
 };

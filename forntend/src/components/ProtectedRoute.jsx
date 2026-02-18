@@ -13,9 +13,15 @@ export default function ProtectedRoute({ children, role }) {
   } catch (err) {
     console.error("Failed to parse user from localStorage:", err);
     user = null;
+
+  localStorage.removeItem("user");
+    user = null;
   }
 
-  /* ✅ Prevent false logout on refresh */
+
+
+
+  /*  Prevent false logout on refresh */
   if (token && !user) {
     return null;  // wait instead of redirecting
   }

@@ -37,7 +37,7 @@ export default function Register() {
     role,
     qualifications:
       role === "admin"
-        ? []   // ✅ safest & correct
+        ? []   // safest & correct
         : form.qualifications,
   };
 

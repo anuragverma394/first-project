@@ -99,8 +99,8 @@ export default function Admin() {
 
  useEffect(() => {
   loadAll();
-  const interval = setInterval(loadTasks, 10000);
-  return () => clearInterval(interval);
+ // const interval = setInterval(loadTasks, 10000);
+  //return () => clearInterval(interval);
 }, []);
 
 
@@ -463,7 +463,33 @@ export default function Admin() {
                                 <span>{t.progress ?? 0}%</span>
                               </div>
                             </td>
-                            <td><Badge value={t.review_status} /></td>
+                            {/* <td><Badge value={t.review_status} /></td> */}
+                            <td>
+  {t.submission ? (
+    t.review_status === "pending" ? (
+      <>
+        <button
+          className="btn btn-approve"
+          onClick={() => handleReview(t.id, "approved")}
+        >
+          Approve
+        </button>
+
+        <button
+          className="btn btn-reject"
+          onClick={() => handleReview(t.id, "rejected")}
+        >
+          Reject
+        </button>
+      </>
+    ) : (
+      <Badge value={t.review_status} />
+    )
+  ) : (
+    <span style={{ color: "#bbb" }}>—</span>
+  )}
+</td>
+
                             <td>
                               {t.submission
                                 ? <a href={`http://localhost:3000/uploads/${t.submission}`} target="_blank" rel="noreferrer" style={{ color: "#1565c0" }}>📎 View</a>

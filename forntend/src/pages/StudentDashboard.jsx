@@ -10,7 +10,7 @@ import {
 
 export default function StudentDashboard() {
   const navigate = useNavigate();
-  // const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token");
   let user = null;
   try { user = JSON.parse(localStorage.getItem("user")); } 
   catch (err) { console.error("Failed to parse user from localStorage:", err);    }
@@ -21,15 +21,15 @@ export default function StudentDashboard() {
   const [completingId, setCompletingId] = useState(null);
   const [uploadingId, setUploadingId]   = useState(null);
 
-  // useEffect(() => {
-  //   if (!token || !user) { navigate("/"); return; }
-  //   fetchTasks();
-  // }, []);
-// useEffect(() => {
-//   if (!token || !user) return;   // do nothing
+  useEffect(() => {
+    if (!token || !user) { navigate("/"); return; }
+    fetchTasks();
+  }, []);
+useEffect(() => {
+  if (!token || !user) return;   // do nothing
 
-//   fetchTasks();
-// }, [token]);
+  fetchTasks();
+}, [token]);
 
 useEffect(() => {
   fetchTasks();

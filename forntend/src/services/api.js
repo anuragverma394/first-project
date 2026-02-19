@@ -1,6 +1,6 @@
 const BASE_URL = "http://localhost:3000/api";
 
-/* ✅ Generic request helper — SAFE JSON handling */
+/*  Generic request helper — SAFE JSON handling */
 const request = async (endpoint, method = "GET", body = null) => {
   const token = localStorage.getItem("token");
 
@@ -12,8 +12,9 @@ const request = async (endpoint, method = "GET", body = null) => {
     headers,
     body: body ? JSON.stringify(body) : null,
   });
+  
 
-  /* ✅ Prevent "Unexpected token <" crash */
+  /* Prevent "Unexpected token <" crash */
   const text = await res.text();
 
   let data;

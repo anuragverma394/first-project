@@ -1,6 +1,7 @@
 
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+
 import {
   getAllUsers,
   deleteUser,
@@ -64,12 +65,14 @@ function Modal({ title, onClose, children }) {
 /* ─── Main Component ─── */
 export default function Admin() {
   const navigate = useNavigate();
-//   const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token");
 
-// let user = null;
-// try {
-//   user = JSON.parse(localStorage.getItem("user"));
-// } catch {}
+let user = null;
+try {
+  user = JSON.parse(localStorage.getItem("user"));
+} catch (err) {
+  console.error("Failed to parse user from localStorage:", err);
+  }
 
 
   /* state */
@@ -85,22 +88,25 @@ export default function Admin() {
   const [taskForm, setTaskForm]           = useState({ email: "", title: "", due_date: "" });
   const [selectedStudent, setSelectedStudent] = useState(null); // for modal
 
-//   useEffect(() => {
-//   if (!token || !user) {
-//     navigate("/", { replace: true });
-//     return;
-//   }
+  useEffect(() => {
+    
+  if (!user) return;
 
-//   if (user.role !== "admin") {
-//     navigate("/", { replace: true });
-//     return;
-//   }
-// }, []);
+  if (!token || !user) {
+    navigate("/", { replace: true });
+    return;
+  }
+
+  if (user.role !== "admin") {
+    navigate("/", { replace: true });
+    return;
+  }
+}, []);
 
  useEffect(() => {
   loadAll();
- // const interval = setInterval(loadTasks, 10000);
-  //return () => clearInterval(interval);
+ const interval = setInterval(loadTasks, 10000);
+  return () => clearInterval(interval);
 }, []);
 
 

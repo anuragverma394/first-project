@@ -1,6 +1,10 @@
+
+
 const bcrypt = require("bcryptjs");
 const jwt    = require("jsonwebtoken");
 const pool   = require("../config/db");
+
+
 
 /* ════════════════════════════════════════
    REGISTER
@@ -137,7 +141,7 @@ exports.login = async (req, res) => {
       { id: user.id,
        role: user.role },
       process.env.JWT_SECRET,
-      { expiresIn: "1d" }
+      //{ expiresIn: "1d" }
     );
 
     res.json({
@@ -244,7 +248,6 @@ exports.deleteUser = async (req, res) => {
     });
   }
 };
-
 /* ════════════════════════════════════════
    CREATE TASK
    ════════════════════════════════════════ */
@@ -287,5 +290,26 @@ exports.createTask = async (req, res) => {
     res.status(500).json({
       message: "Failed to assign task ❌",
     });
+  }
+};
+
+exports.getCurrentUser = async (req, res) => {
+  try {
+    const result = await pool.query(
+      `SELECT id, name, email, role
+       FROM "user".users
+       WHERE id = $1`,
+      [req.user.id]
+    );
+
+    if (!result.rows.length) {
+      return res.status(404).json({ message: "User not found ❌" });
+    }
+
+    res.json({ user: result.rows[0] });
+
+  } catch (err) {
+    console.error("ME ERROR ❌", err.message);
+    res.status(500).json({ message: "Server error ❌" });
   }
 };

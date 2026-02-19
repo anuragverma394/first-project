@@ -26,14 +26,7 @@ export default function Login() {
 
   try {
     /* Static admin shortcut */
-    if (
-      form.role === "admin" &&
-      form.email === "admin@gmail.com" &&
-      form.password === "admin"
-    ) {
-      navigate("/admin");
-      return;
-    }
+   
     
 
     const res = await loginUser(form);
@@ -54,7 +47,9 @@ export default function Login() {
     /* ✅ Save session */
     localStorage.setItem("token", res.token);
     localStorage.setItem("user", JSON.stringify(res.user));
+    console.log("Stored user:", localStorage.getItem("user"));
 
+    
     navigate(res.user.role === "admin" ? "/admin" : "/student");
   } catch (err) {
     setError(err.message || "Login failed");

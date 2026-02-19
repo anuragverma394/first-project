@@ -1,23 +1,23 @@
-const jwt = require("jsonwebtoken");
+// const jwt = require("jsonwebtoken");
 
-module.exports = (req, res, next) => {
-  const authHeader = req.headers.authorization;
+// module.exports = (req, res, next) => {
+//   const authHeader = req.headers.authorization;
 
-  if (!authHeader || !authHeader.startsWith("Bearer ")) {
-    return res.status(401).json({ message: "No token provided ❌" });
-  }
+//   if (!authHeader || !authHeader.startsWith("Bearer ")) {
+//     return res.status(401).json({ message: "No token provided ❌" });
+//   }
 
-  const token = authHeader.split(" ")[1];
+//   const token = authHeader.split(" ")[1];
+ 
+//   try {
+//     const decoded = jwt.verify(token, process.env.JWT_SECRET); 
 
-  try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET); 
+//     req.user = decoded;  // contains id + role
+//     next();
+ 
+//   } catch (err) {
+//     console.error("JWT ERROR ❌", err.message);
 
-    req.user = decoded;  // contains id + role
-    next();
-
-  } catch (err) {
-    console.error("JWT ERROR ❌", err.message);
-
-    return res.status(401).json({ message: "Invalid token ❌" });
-  }
-};
+//     return res.status(401).json({ message: "Invalid token ❌" });
+//   }
+// };

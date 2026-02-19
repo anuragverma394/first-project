@@ -56,7 +56,7 @@ export default function Register() {
 
     const validateYear = (year) => {
       const y = Number(year);
-      return y >= 1750 && y <= currentYear;
+      return y >= 1550 && y <= currentYear;
     };
 
     const addQualification = () => {
@@ -68,7 +68,7 @@ export default function Register() {
       }
 
       if (!validateYear(year)) {
-        alert(`Year must be between 1750 and ${currentYear}`);
+        alert(`Year must be between 1550 and ${currentYear}`);
         return;
       }
 
@@ -108,7 +108,7 @@ export default function Register() {
 
   const updateQualification = () => {
     if (editIndex === null) return;
-    if (!validateYear(qualificationInput.year)) { alert(`Year must be between 1750 and ${currentYear}`); return; }
+    if (!validateYear(qualificationInput.year)) { alert(`Year must be between 1550 and ${currentYear}`); return; }
     if (Number(qualificationInput.percentage) > 100) { alert("Percentage cannot exceed 100"); return; }
     const updated = [...form.qualifications];
     updated[editIndex] = qualificationInput;
